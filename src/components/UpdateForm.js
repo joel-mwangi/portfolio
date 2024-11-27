@@ -1,0 +1,72 @@
+import React, { useState } from 'react';
+
+function UpdateForm() {
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [image, setImage] = useState(null);
+  const [statusMessage, setStatusMessage] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatusMessage('Submitting...');
+
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('content', content);
+    if (image) formData.append('image', image);
+
+    try {
+      const response = await fetch('/api/updates/', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        setStatusMessage('Update submitted successfully!');
+        setTitle('');
+        setContent('');
+        setImage(null);
+      } else {
+        setStatusMessage('Failed to submit update.');
+      }
+    } catch (error) {
+      setStatusMessage('Error: ' + error.message);
+    }
+  };
+
+  return (
+    <div>
+      <h2>Submit a New Update</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Title</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Content</label>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            required
+          ></textarea>
+        </div>
+        <div>
+          <label>Image (optional)</label>
+          <input
+            type="file"
+            onChange={(e) => setImage(e.target.files[0])}
+          />
+        </div>
+        <button type="submit">Submit Update</button>
+      </form>
+      <div>{statusMessage}</div>
+    </div>
+  );
+}
+
+export default UpdateForm;

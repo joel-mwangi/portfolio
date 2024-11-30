@@ -40,42 +40,47 @@ const UploadButton = styled.button`
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin: 10px;
   &:hover {
     background-color: #218838;
   }
 `;
 
 const ProfilePicture = () => {
-  const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const fileInputRef = useRef(null); // Reference for the file input
+  const [image, setImage] = useState(null); // Store the current file
+  const [preview, setPreview] = useState(null); // Display the preview of the selected image
+  const fileInputRef = useRef(null); // Reference for the hidden file input
 
   // Handle file selection
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
+      // Clean up the previous preview URL if it exists
+      if (preview) {
+        URL.revokeObjectURL(preview);
+      }
+
+      // Set the new file and generate its preview
       setImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setPreview(URL.createObjectURL(file));
     }
   };
 
-  // Handle file upload
+  // Handle the "Select Image" button click
+  const handleButtonClick = () => {
+    fileInputRef.current.click(); // Programmatically click the hidden file input
+  };
+
+  // Simulate the upload process and clear the file (no backend)
   const handleUpload = () => {
     if (!image) {
       alert('Please select an image first.');
       return;
     }
+
     console.log('Uploading file:', image);
     alert('Image successfully uploaded!');
-  };
-
-  // Trigger the file input click programmatically
-  const handleButtonClick = () => {
-    fileInputRef.current.click();
+    setImage(null); // Clear the current file
   };
 
   return (
@@ -88,7 +93,7 @@ const ProfilePicture = () => {
           <PlaceholderText>No image uploaded</PlaceholderText>
         )}
       </PreviewContainer>
-      {/* Hidden file input, triggered by custom button */}
+      {/* Hidden file input triggered by the custom button */}
       <FileInput
         type="file"
         accept="image/*"
